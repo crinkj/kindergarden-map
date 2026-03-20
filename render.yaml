@@ -1,0 +1,22 @@
+services:
+  - type: web
+    name: kindergarden-map-backend
+    runtime: docker
+    dockerfilePath: backend/Dockerfile
+    dockerContext: .
+    plan: free
+    envVars:
+      - key: DATABASE_URL
+        sync: false
+      - key: KINDERGARTEN_API_KEY
+        sync: false
+      - key: FRONTEND_URL
+        sync: false
+      - key: NODE_ENV
+        value: production
+      - key: MOCK_MODE
+        value: "false"
+      - key: API_RATE_LIMIT_MS
+        value: "300"
+      - key: API_TIMEOUT_MS
+        value: "10000"

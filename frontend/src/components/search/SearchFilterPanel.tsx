@@ -1,0 +1,180 @@
+'use client';
+
+import { SidoItem, SggItem } from '@/lib/types';
+import { ESTABLISH_TYPES } from '@/lib/constants';
+
+interface SearchFilterPanelProps {
+  keyword: string;
+  onKeywordChange: (value: string) => void;
+
+  sidoCode: string;
+  sggCode: string;
+  onSidoChange: (code: string) => void;
+  onSggChange: (code: string) => void;
+  sidoList: SidoItem[];
+  sggList: SggItem[];
+
+  establish: string;
+  onEstablishChange: (value: string) => void;
+
+  hasOpertime: boolean;
+  onHasOpertimeChange: (value: boolean) => void;
+  hasHomepage: boolean;
+  onHasHomepageChange: (value: boolean) => void;
+
+  onReset: () => void;
+  isLoading: boolean;
+  isError: boolean;
+}
+
+export default function SearchFilterPanel({
+  keyword,
+  onKeywordChange,
+  sidoCode,
+  sggCode,
+  onSidoChange,
+  onSggChange,
+  sidoList,
+  sggList,
+  establish,
+  onEstablishChange,
+  hasOpertime,
+  onHasOpertimeChange,
+  hasHomepage,
+  onHasHomepageChange,
+  onReset,
+  isLoading,
+  isError,
+}: SearchFilterPanelProps) {
+  const inputClass =
+    'w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500';
+
+  return (
+    <div className="flex flex-col gap-4 p-4">
+      {isError && (
+        <div className="rounded bg-red-50 px-3 py-2 text-xs text-red-600">
+          필터 로드 실패. 새로고침을 시도해 주세요.
+        </div>
+      )}
+
+      {/* 검색어 */}
+      <div>
+        <label htmlFor="keyword-input" className="mb-1 block text-xs font-medium text-gray-700">
+          유치원명 검색
+        </label>
+        <input
+          id="keyword-input"
+          type="text"
+          value={keyword}
+          onChange={(e) => onKeywordChange(e.target.value)}
+          placeholder="유치원 이름 입력..."
+          className={inputClass}
+          aria-label="유치원명 검색"
+          disabled={isLoading}
+        />
+      </div>
+
+      {/* 시도 선택 */}
+      <div>
+        <label htmlFor="sido-select" className="mb-1 block text-xs font-medium text-gray-700">
+          시도
+        </label>
+        <select
+          id="sido-select"
+          value={sidoCode}
+          onChange={(e) => {
+            onSidoChange(e.target.value);
+            onSggChange('');
+          }}
+          className={inputClass}
+          aria-label="시도 선택"
+          disabled={isLoading}
+        >
+          <option value="">전체 시도</option>
+          {sidoList.map((sido) => (
+            <option key={sido.code} value={sido.code}>
+              {sido.name}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      {/* 시군구 선택 */}
+      <div>
+        <label htmlFor="sgg-select" className="mb-1 block text-xs font-medium text-gray-700">
+          시군구
+        </label>
+        <select
+          id="sgg-select"
+          value={sggCode}
+          onChange={(e) => onSggChange(e.target.value)}
+          className={inputClass}
+          aria-label="시군구 선택"
+          disabled={isLoading || !sidoCode}
+        >
+          <option value="">전체 시군구</option>
+          {sggList.map((sgg) => (
+            <option key={sgg.sggCode} value={sgg.sggCode}>
+              {sgg.name}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      {/* 설립유형 */}
+      <div>
+        <label htmlFor="establish-select" className="mb-1 block text-xs font-medium text-gray-700">
+          설립유형
+        </label>
+        <select
+          id="establish-select"
+          value={establish}
+          onChange={(e) => onEstablishChange(e.target.value)}
+          className={inputClass}
+          aria-label="설립유형 선택"
+          disabled={isLoading}
+        >
+          {ESTABLISH_TYPES.map((type) => (
+            <option key={type.value} value={type.value}>
+              {type.label}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      {/* 부가 필터 */}
+      <div className="flex flex-col gap-2">
+        <label className="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
+          <input
+            type="checkbox"
+            checked={hasOpertime}
+            onChange={(e) => onHasOpertimeChange(e.target.checked)}
+            className="rounded border-gray-300"
+            disabled={isLoading}
+          />
+          운영시간 정보 있음
+        </label>
+        <label className="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
+          <input
+            type="checkbox"
+            checked={hasHomepage}
+            onChange={(e) => onHasHomepageChange(e.target.checked)}
+            className="rounded border-gray-300"
+            disabled={isLoading}
+          />
+          홈페이지 있음
+        </label>
+      </div>
+
+      {/* 리셋 */}
+      <button
+        onClick={onReset}
+        className="w-full rounded bg-gray-200 px-4 py-2 text-sm text-gray-700 hover:bg-gray-300 transition"
+        aria-label="필터 초기화"
+        disabled={isLoading}
+      >
+        필터 초기화
+      </button>
+    </div>
+  );
+}

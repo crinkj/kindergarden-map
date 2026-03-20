@@ -1,0 +1,85 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Kindergarten {
+  id              Int       @id @default(autoincrement())
+  kinderCode      String    @unique @map("kinder_code")
+  officeedu       String    @map("officeedu")
+  subofficeedu    String    @map("subofficeedu")
+  kindername      String    @map("kindername")
+  establish       String?   @map("establish")
+  edate           String?   @map("edate")
+  odate           String?   @map("odate")
+  addr            String?   @map("addr")
+  telno           String?   @map("telno")
+  hpaddr          String?   @map("hpaddr")
+  opertime        String?   @map("opertime")
+  clcnt3          Int       @default(0) @map("clcnt3")
+  clcnt4          Int       @default(0) @map("clcnt4")
+  clcnt5          Int       @default(0) @map("clcnt5")
+  mixclcnt        Int       @default(0) @map("mixclcnt")
+  shclcnt         Int       @default(0) @map("shclcnt")
+  prmstfcnt       Int       @default(0) @map("prmstfcnt")
+  ag3fpcnt        Int       @default(0) @map("ag3fpcnt")
+  ag4fpcnt        Int       @default(0) @map("ag4fpcnt")
+  ag5fpcnt        Int       @default(0) @map("ag5fpcnt")
+  mixfpcnt        Int       @default(0) @map("mixfpcnt")
+  spcnfpcnt       Int       @default(0) @map("spcnfpcnt")
+  ppcnt3          Int       @default(0) @map("ppcnt3")
+  ppcnt4          Int       @default(0) @map("ppcnt4")
+  ppcnt5          Int       @default(0) @map("ppcnt5")
+  mixppcnt        Int       @default(0) @map("mixppcnt")
+  shppcnt         Int       @default(0) @map("shppcnt")
+  pbnttmng        String?   @map("pbnttmng")
+  lttdcdnt        Float?    @map("lttdcdnt")
+  lngtcdnt        Float?    @map("lngtcdnt")
+
+  totalClassCount Int       @default(0) @map("total_class_count")
+  totalChildCount Int       @default(0) @map("total_child_count")
+
+  sidoCode        String?   @map("sido_code")
+  sggCode         String?   @map("sgg_code")
+
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @updatedAt @map("updated_at")
+
+  @@index([sidoCode])
+  @@index([sggCode])
+  @@index([kindername])
+  @@index([establish])
+  @@index([lttdcdnt, lngtcdnt])
+  @@map("kindergartens")
+}
+
+model RegionCode {
+  id          Int      @id @default(autoincrement())
+  sidoCode    String   @map("sido_code")
+  sidoName    String   @map("sido_name")
+  sggCode     String?  @map("sgg_code")
+  sggName     String?  @map("sgg_name")
+
+  @@unique([sidoCode, sggCode])
+  @@index([sidoCode])
+  @@map("region_codes")
+}
+
+model SyncJob {
+  id          Int       @id @default(autoincrement())
+  status      String    @default("pending") @map("status")
+  jobType     String    @default("full") @map("job_type")
+  targetCode  String?   @map("target_code")
+  totalCount  Int       @default(0) @map("total_count")
+  errorCount  Int       @default(0) @map("error_count")
+  errorLog    String?   @map("error_log")
+  startedAt   DateTime? @map("started_at")
+  completedAt DateTime? @map("completed_at")
+  createdAt   DateTime  @default(now()) @map("created_at")
+
+  @@map("sync_jobs")
+}
