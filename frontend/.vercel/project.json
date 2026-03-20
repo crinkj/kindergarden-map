@@ -1,0 +1,16 @@
+{
+  "projectId": "prj_s2QrVLDavD3gxwt5tM6dUYy9D7bb",
+  "orgId": "team_TNzfdhfsx8mh1ijGEkw36Bjr",
+  "projectName": "kindergarden-map",
+  "settings": {
+    "createdAt": 1774022267837,
+    "framework": "nextjs",
+    "devCommand": null,
+    "installCommand": null,
+    "buildCommand": null,
+    "outputDirectory": null,
+    "rootDirectory": null,
+    "directoryListing": false,
+    "nodeVersion": "24.x"
+  }
+}
