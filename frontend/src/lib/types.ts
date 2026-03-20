@@ -89,6 +89,9 @@ export interface KindergartenFilters {
   sidoCode: string;
   sggCode: string;
   establish: string;
+  minChildren?: number;
+  maxChildren?: number;
+  sortBy?: string;
   page: number;
 }
 

@@ -15,6 +15,8 @@ interface KindergartenListProps {
   isLoading: boolean;
   isError: boolean;
   isEmpty: boolean;
+  rankingMode?: boolean;
+  pageOffset?: number;
 }
 
 function SkeletonCard() {
@@ -37,6 +39,8 @@ export default function KindergartenList({
   isLoading,
   isError,
   isEmpty,
+  rankingMode = false,
+  pageOffset = 0,
 }: KindergartenListProps) {
   if (isLoading) {
     return (
@@ -70,7 +74,8 @@ export default function KindergartenList({
   return (
     <div className="flex flex-col h-full">
       <div className="flex-1 overflow-y-auto p-2">
-        {items.map((item) => {
+        {items.map((item, idx) => {
+          const rank = pageOffset + idx + 1;
           const isSelected = item.kinderCode === selectedKinderCode;
           const badgeClass =
             ESTABLISH_BADGE_COLORS[item.establish ?? ''] ?? 'bg-gray-300 text-gray-700';
@@ -92,9 +97,17 @@ export default function KindergartenList({
               aria-label={`${item.kindername} 선택`}
             >
               <div className="flex items-start justify-between gap-2 mb-1">
-                <p className="font-semibold text-sm text-gray-900 leading-snug flex-1">
-                  {item.kindername}
-                </p>
+                <div className="flex items-center gap-2 flex-1 min-w-0">
+                  {rankingMode && (
+                    <span className={`flex-shrink-0 text-xs font-bold w-6 text-center
+                      ${rank === 1 ? 'text-yellow-500' : rank === 2 ? 'text-gray-400' : rank === 3 ? 'text-amber-600' : 'text-gray-400'}`}>
+                      {rank}
+                    </span>
+                  )}
+                  <p className="font-semibold text-sm text-gray-900 leading-snug flex-1 truncate">
+                    {item.kindername}
+                  </p>
+                </div>
                 {item.establish && (
                   <span className={`text-xs px-2 py-0.5 rounded flex-shrink-0 ${badgeClass}`}>
                     {item.establish}

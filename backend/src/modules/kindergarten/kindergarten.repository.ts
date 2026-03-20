@@ -40,6 +40,14 @@ export class KindergartenRepository {
       where.establish = dto.establish;
     }
 
+    // Children count range filter
+    if (dto.minChildren !== undefined || dto.maxChildren !== undefined) {
+      where.totalChildCount = {
+        ...(dto.minChildren !== undefined ? { gte: dto.minChildren } : {}),
+        ...(dto.maxChildren !== undefined ? { lte: dto.maxChildren } : {}),
+      };
+    }
+
     return where;
   }
 
@@ -52,12 +60,18 @@ export class KindergartenRepository {
     const limit = dto.limit ?? 100;
     const skip = (page - 1) * limit;
 
+    const orderBy = dto.sortBy === 'children'
+      ? { totalChildCount: 'desc' as const }
+      : dto.sortBy === 'classes'
+      ? { totalClassCount: 'desc' as const }
+      : { kindername: 'asc' as const };
+
     const [items, total] = await Promise.all([
       this.prisma.kindergarten.findMany({
         where,
         skip,
         take: limit,
-        orderBy: { kindername: 'asc' },
+        orderBy,
       }),
       this.prisma.kindergarten.count({ where }),
     ]);

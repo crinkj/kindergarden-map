@@ -52,6 +52,22 @@ export class SearchKindergartenDto {
   limit?: number = 100;
 
   @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  @Min(0)
+  minChildren?: number;
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  @Min(0)
+  maxChildren?: number;
+
+  @IsOptional()
+  @IsString()
+  sortBy?: string;
+
+  @IsOptional()
   @IsString()
   format?: string;
 }

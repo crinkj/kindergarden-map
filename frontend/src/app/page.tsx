@@ -20,6 +20,9 @@ export default function HomePage() {
   const [sidoCode, setSidoCode] = useState('');
   const [sggCode, setSggCode] = useState('');
   const [establish, setEstablish] = useState('');
+  const [minChildren, setMinChildren] = useState('');
+  const [maxChildren, setMaxChildren] = useState('');
+  const [rankingMode, setRankingMode] = useState(false);
   const [hasOpertime, setHasOpertime] = useState(false);
   const [hasHomepage, setHasHomepage] = useState(false);
   const [page, setPage] = useState(1);
@@ -54,10 +57,19 @@ export default function HomePage() {
       .catch(() => setSggList([]));
   }, [sidoCode]);
 
+  // Ranking mode: sort by children when region selected
+  const effectiveSortBy = rankingMode ? 'children' : undefined;
+
   // Fetch kindergartens
   const effectiveBounds: MapBounds | null = bounds;
   const { data, isLoading, isError } = useKindergartens(
-    { keyword, sidoCode, sggCode, establish, page },
+    {
+      keyword, sidoCode, sggCode, establish,
+      minChildren: minChildren ? Number(minChildren) : undefined,
+      maxChildren: maxChildren ? Number(maxChildren) : undefined,
+      sortBy: effectiveSortBy,
+      page,
+    },
     effectiveBounds,
   );
 
@@ -93,10 +105,28 @@ export default function HomePage() {
     setSidoCode('');
     setSggCode('');
     setEstablish('');
+    setMinChildren('');
+    setMaxChildren('');
+    setRankingMode(false);
     setHasOpertime(false);
     setHasHomepage(false);
     setPage(1);
   }, []);
+
+  const handleExcelDownload = useCallback(() => {
+    const params = new URLSearchParams();
+    if (keyword) params.set('keyword', keyword);
+    if (sidoCode) params.set('sidoCode', sidoCode);
+    if (sggCode) params.set('sggCode', sggCode);
+    if (establish) params.set('establish', establish);
+    if (minChildren) params.set('minChildren', minChildren);
+    if (maxChildren) params.set('maxChildren', maxChildren);
+    if (effectiveSortBy) params.set('sortBy', effectiveSortBy);
+    params.set('format', 'csv');
+    params.set('limit', '500');
+    const url = `${API_BASE}/api/kindergartens?${params.toString()}`;
+    window.open(url, '_blank');
+  }, [keyword, sidoCode, sggCode, establish, minChildren, maxChildren, effectiveSortBy, API_BASE]);
 
   const handleOpenDirections = useCallback((addr: string) => {
     const url = `https://map.kakao.com/link/search/${encodeURIComponent(addr)}`;
@@ -130,17 +160,24 @@ export default function HomePage() {
           onKeywordChange={(v) => { setKeyword(v); setPage(1); }}
           sidoCode={sidoCode}
           sggCode={sggCode}
-          onSidoChange={(v) => { setSidoCode(v); setPage(1); }}
+          onSidoChange={(v) => { setSidoCode(v); setRankingMode(false); setPage(1); }}
           onSggChange={(v) => { setSggCode(v); setPage(1); }}
           sidoList={sidoData?.data ?? []}
           sggList={sggList}
           establish={establish}
           onEstablishChange={(v) => { setEstablish(v); setPage(1); }}
+          minChildren={minChildren}
+          maxChildren={maxChildren}
+          onMinChildrenChange={(v) => { setMinChildren(v); setPage(1); }}
+          onMaxChildrenChange={(v) => { setMaxChildren(v); setPage(1); }}
+          rankingMode={rankingMode}
+          onRankingModeChange={(v) => { setRankingMode(v); setPage(1); }}
           hasOpertime={hasOpertime}
           onHasOpertimeChange={setHasOpertime}
           hasHomepage={hasHomepage}
           onHasHomepageChange={setHasHomepage}
           onReset={handleReset}
+          onExcelDownload={handleExcelDownload}
           isLoading={isLoading}
           isError={isError}
         />
@@ -159,6 +196,8 @@ export default function HomePage() {
           isLoading={isLoading}
           isError={isError}
           isEmpty={isEmpty}
+          rankingMode={rankingMode}
+          pageOffset={(page - 1) * 100}
         />
       </div>
     </div>

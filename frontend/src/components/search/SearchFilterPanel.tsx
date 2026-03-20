@@ -17,12 +17,21 @@ interface SearchFilterPanelProps {
   establish: string;
   onEstablishChange: (value: string) => void;
 
+  minChildren: string;
+  maxChildren: string;
+  onMinChildrenChange: (value: string) => void;
+  onMaxChildrenChange: (value: string) => void;
+
+  rankingMode: boolean;
+  onRankingModeChange: (value: boolean) => void;
+
   hasOpertime: boolean;
   onHasOpertimeChange: (value: boolean) => void;
   hasHomepage: boolean;
   onHasHomepageChange: (value: boolean) => void;
 
   onReset: () => void;
+  onExcelDownload: () => void;
   isLoading: boolean;
   isError: boolean;
 }
@@ -38,11 +47,18 @@ export default function SearchFilterPanel({
   sggList,
   establish,
   onEstablishChange,
+  minChildren,
+  maxChildren,
+  onMinChildrenChange,
+  onMaxChildrenChange,
+  rankingMode,
+  onRankingModeChange,
   hasOpertime,
   onHasOpertimeChange,
   hasHomepage,
   onHasHomepageChange,
   onReset,
+  onExcelDownload,
   isLoading,
   isError,
 }: SearchFilterPanelProps) {
@@ -142,6 +158,46 @@ export default function SearchFilterPanel({
         </select>
       </div>
 
+      {/* 원아 수 범위 */}
+      <div>
+        <label className="mb-1 block text-xs font-medium text-gray-700">원아 수</label>
+        <div className="flex items-center gap-2">
+          <input
+            type="number"
+            min={0}
+            value={minChildren}
+            onChange={(e) => onMinChildrenChange(e.target.value)}
+            placeholder="최소"
+            className={inputClass + ' w-full'}
+            disabled={isLoading}
+          />
+          <span className="text-gray-400 text-xs flex-shrink-0">~</span>
+          <input
+            type="number"
+            min={0}
+            value={maxChildren}
+            onChange={(e) => onMaxChildrenChange(e.target.value)}
+            placeholder="최대"
+            className={inputClass + ' w-full'}
+            disabled={isLoading}
+          />
+        </div>
+      </div>
+
+      {/* 랭킹 모드 */}
+      {(sidoCode || sggCode) && (
+        <label className="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
+          <input
+            type="checkbox"
+            checked={rankingMode}
+            onChange={(e) => onRankingModeChange(e.target.checked)}
+            className="rounded border-gray-300"
+            disabled={isLoading}
+          />
+          원아 수 순위 보기
+        </label>
+      )}
+
       {/* 부가 필터 */}
       <div className="flex flex-col gap-2">
         <label className="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
@@ -166,15 +222,24 @@ export default function SearchFilterPanel({
         </label>
       </div>
 
-      {/* 리셋 */}
-      <button
-        onClick={onReset}
-        className="w-full rounded bg-gray-200 px-4 py-2 text-sm text-gray-700 hover:bg-gray-300 transition"
-        aria-label="필터 초기화"
-        disabled={isLoading}
-      >
-        필터 초기화
-      </button>
+      {/* 버튼 */}
+      <div className="flex flex-col gap-2">
+        <button
+          onClick={onExcelDownload}
+          className="w-full rounded bg-green-600 px-4 py-2 text-sm text-white hover:bg-green-700 transition"
+          disabled={isLoading}
+        >
+          엑셀 다운로드
+        </button>
+        <button
+          onClick={onReset}
+          className="w-full rounded bg-gray-200 px-4 py-2 text-sm text-gray-700 hover:bg-gray-300 transition"
+          aria-label="필터 초기화"
+          disabled={isLoading}
+        >
+          필터 초기화
+        </button>
+      </div>
     </div>
   );
 }

@@ -32,6 +32,9 @@ export function useKindergartens(
     sidoCode: filters.sidoCode,
     sggCode: filters.sggCode,
     establish: filters.establish,
+    minChildren: filters.minChildren,
+    maxChildren: filters.maxChildren,
+    sortBy: filters.sortBy,
     page: filters.page ?? 1,
     limit: 100,
   });
