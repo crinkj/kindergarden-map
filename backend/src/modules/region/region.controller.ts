@@ -10,6 +10,14 @@ export class RegionController {
     return { data: this.regionService.getSidoList() };
   }
 
+  @Get('stats')
+  async getStats(
+    @Query('sidoCode') sidoCode?: string,
+  ): Promise<{ data: { code: string; name: string; count: number; totalChildren: number }[] }> {
+    const data = await this.regionService.getStats(sidoCode);
+    return { data };
+  }
+
   @Get('sgg')
   async getSgg(
     @Query('sidoCode') sidoCode: string,

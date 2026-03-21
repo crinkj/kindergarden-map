@@ -6,6 +6,7 @@ import ThreePanelLayout from '@/components/layout/ThreePanelLayout';
 import MapWrapper from '@/components/map/MapWrapper';
 import SearchFilterPanel from '@/components/search/SearchFilterPanel';
 import KindergartenList from '@/components/search/KindergartenList';
+import RegionRanking from '@/components/search/RegionRanking';
 import KindergartenDetail from '@/components/detail/KindergartenDetail';
 import DataDisclaimer from '@/components/common/DataDisclaimer';
 import { useKindergartens } from '@/hooks/useKindergartens';
@@ -23,6 +24,7 @@ export default function HomePage() {
   const [minChildren, setMinChildren] = useState('');
   const [maxChildren, setMaxChildren] = useState('');
   const [rankingMode, setRankingMode] = useState(false);
+  const [listTab, setListTab] = useState<'list' | 'region'>('list');
   const [hasOpertime, setHasOpertime] = useState(false);
   const [hasHomepage, setHasHomepage] = useState(false);
   const [page, setPage] = useState(1);
@@ -108,6 +110,7 @@ export default function HomePage() {
     setMinChildren('');
     setMaxChildren('');
     setRankingMode(false);
+    setListTab('list');
     setHasOpertime(false);
     setHasHomepage(false);
     setPage(1);
@@ -182,23 +185,45 @@ export default function HomePage() {
           isError={isError}
         />
       </div>
-      <div className="flex-1 overflow-hidden">
-        <div className="px-3 py-2 border-b border-gray-200 text-xs text-gray-500">
-          {meta ? `총 ${meta.total.toLocaleString()}개` : '지도를 이동하거나 검색하세요'}
+      <div className="flex-1 overflow-hidden flex flex-col">
+        {/* 탭 */}
+        <div className="flex border-b border-gray-200 flex-shrink-0">
+          <button
+            onClick={() => setListTab('list')}
+            className={`flex-1 py-2 text-xs font-medium transition ${listTab === 'list' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-500 hover:text-gray-700'}`}
+          >
+            {meta ? `유치원 목록 ${meta.total.toLocaleString()}개` : '유치원 목록'}
+          </button>
+          <button
+            onClick={() => setListTab('region')}
+            className={`flex-1 py-2 text-xs font-medium transition ${listTab === 'region' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-500 hover:text-gray-700'}`}
+          >
+            지역별 순위
+          </button>
         </div>
-        <KindergartenList
-          items={items}
-          selectedKinderCode={selectedKinderCode}
-          onSelectItem={handleSelect}
-          currentPage={page}
-          totalPages={meta?.totalPages ?? 1}
-          onPageChange={setPage}
-          isLoading={isLoading}
-          isError={isError}
-          isEmpty={isEmpty}
-          rankingMode={rankingMode}
-          pageOffset={(page - 1) * 100}
-        />
+
+        <div className="flex-1 overflow-hidden">
+          {listTab === 'list' ? (
+            <KindergartenList
+              items={items}
+              selectedKinderCode={selectedKinderCode}
+              onSelectItem={handleSelect}
+              currentPage={page}
+              totalPages={meta?.totalPages ?? 1}
+              onPageChange={setPage}
+              isLoading={isLoading}
+              isError={isError}
+              isEmpty={isEmpty}
+              rankingMode={rankingMode}
+              pageOffset={(page - 1) * 100}
+            />
+          ) : (
+            <RegionRanking
+              sidoCode={sidoCode}
+              onSelectSgg={(code) => { setSggCode(code); setListTab('list'); setPage(1); }}
+            />
+          )}
+        </div>
       </div>
     </div>
   );
