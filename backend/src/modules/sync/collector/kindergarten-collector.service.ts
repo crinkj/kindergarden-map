@@ -14,6 +14,7 @@ interface KindergartenApiItem {
   establish?: string;
   edate?: string;
   odate?: string;
+  zipcode?: string;
   addr?: string;
   telno?: string;
   hpaddr?: string;
@@ -332,6 +333,7 @@ export class KindergartenCollectorService {
       establish: item.establish ?? null,
       edate: item.edate ?? null,
       odate: item.odate ?? null,
+      zipcode: item.zipcode ?? null,
       addr: item.addr ?? null,
       telno: item.telno ?? null,
       hpaddr: item.hpaddr ?? null,

@@ -95,6 +95,66 @@ export interface KindergartenFilters {
   page: number;
 }
 
+export interface ChildcareListItem {
+  stcode: string;
+  crname: string;
+  crtypename: string | null;
+  crstatusname: string | null;
+  craddr: string | null;
+  crtelno: string | null;
+  crhome: string | null;
+  crcapat: number;
+  crchcnt: number;
+  la: number | null;
+  lo: number | null;
+  arcode: string | null;
+  sidoname: string | null;
+  sigunguname: string | null;
+  updatedAt: string;
+}
+
+export interface ChildcareDetail {
+  id: number;
+  stcode: string;
+  crname: string;
+  crtypename: string | null;
+  crstatusname: string | null;
+  sidoname: string | null;
+  sigunguname: string | null;
+  arcode: string | null;
+  zipcode: string | null;
+  craddr: string | null;
+  crtelno: string | null;
+  crfaxno: string | null;
+  crhome: string | null;
+  crcapat: number;
+  crchcnt: number;
+  la: number | null;
+  lo: number | null;
+  nrtrroomcnt: number;
+  cctvinstlcnt: number;
+  chcrtescnt: number;
+  crspec: string | null;
+  crcnfmdt: string | null;
+  frstcnfmdt: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ChildcareListResponse {
+  data: ChildcareListItem[];
+  meta: PaginationMeta;
+}
+
+export interface ChildcareFilters {
+  keyword: string;
+  arcode: string;
+  crtype: string;
+  minChildren?: number;
+  maxChildren?: number;
+  page: number;
+}
+
 export interface SyncJob {
   id: number;
   status: string;

@@ -6,6 +6,7 @@ import { KindergartenModule } from './modules/kindergarten/kindergarten.module';
 import { RegionModule } from './modules/region/region.module';
 import { SyncModule } from './modules/sync/sync.module';
 import { AdminModule } from './modules/admin/admin.module';
+import { ChildcareModule } from './modules/childcare/childcare.module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { AdminModule } from './modules/admin/admin.module';
     RegionModule,
     SyncModule,
     AdminModule,
+    ChildcareModule,
   ],
   controllers: [AppController],
 })

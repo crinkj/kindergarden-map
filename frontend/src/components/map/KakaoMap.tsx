@@ -1,18 +1,19 @@
 'use client';
 
 import { useEffect, useRef, useCallback } from 'react';
-import { useKakaoMap, KakaoMap as KakaoMapInstance, KakaoMarker } from '@/hooks/useKakaoMap';
+import { useKakaoMap, KakaoMap as KakaoMapInstance, KakaoMarker, KakaoMarkerImage, KakaoSize } from '@/hooks/useKakaoMap';
 import { MapBounds } from '@/lib/types';
 import LoadingSpinner from '@/components/common/LoadingSpinner';
 import { DEFAULT_MAP_CENTER, DEFAULT_MAP_LEVEL } from '@/lib/constants';
 
-interface MarkerData {
+export interface MarkerData {
   kinderCode: string;
   kindername: string;
   lttdcdnt: number;
   lngtcdnt: number;
   establish: string;
   totalChildCount: number;
+  markerType?: 'kindergarten' | 'childcare';
 }
 
 interface KakaoMapProps {
@@ -37,6 +38,8 @@ export default function KakaoMap({
     clear: () => void;
   } | null>(null);
   const markerMapRef = useRef<Map<string, KakaoMarker>>(new Map());
+  const markerDataRef = useRef<Map<string, MarkerData>>(new Map());
+  const selectedMarkerIdRef = useRef<string | null>(null);
   const infoWindowRef = useRef<{
     open: (map: KakaoMapInstance, marker: KakaoMarker) => void;
     close: () => void;
@@ -104,6 +107,8 @@ export default function KakaoMap({
     // Remove old markers
     markerMapRef.current.forEach((marker) => marker.setMap(null));
     markerMapRef.current.clear();
+    markerDataRef.current.clear();
+    selectedMarkerIdRef.current = null;
     clusterer.clear();
 
     const newMarkers: KakaoMarker[] = [];
@@ -112,19 +117,34 @@ export default function KakaoMap({
       if (data.lttdcdnt === null || data.lngtcdnt === null) continue;
 
       const position = new kakao.maps.LatLng(data.lttdcdnt, data.lngtcdnt);
-      const marker = new kakao.maps.Marker({ position });
+
+      // Use different marker image for childcare centers (green tint)
+      let markerImage: KakaoMarkerImage | undefined;
+      if (data.markerType === 'childcare') {
+        const imageSize = new kakao.maps.Size(24, 35);
+        markerImage = new kakao.maps.MarkerImage(
+          'https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/markerStar.png',
+          imageSize,
+        );
+      }
+
+      const marker = new kakao.maps.Marker({ position, image: markerImage });
 
       markerMapRef.current.set(data.kinderCode, marker);
+      markerDataRef.current.set(data.kinderCode, data);
 
       kakao.maps.event.addListener(marker, 'click', () => {
         onMarkerClick(data.kinderCode);
 
         if (infoWindowRef.current) {
+          const typeLabel = data.markerType === 'childcare' ? '어린이집' : '유치원';
+          const childLabel = data.markerType === 'childcare' ? '현원' : '원아';
           const content = `
             <div style="padding:6px 10px;font-size:13px;min-width:120px;">
               <strong>${data.kindername}</strong>
               <br />
-              <span style="color:#4B5563;">원아 ${data.totalChildCount}명</span>
+              <span style="color:#6B7280;font-size:11px;">${typeLabel}</span>
+              <span style="color:#4B5563;"> · ${childLabel} ${data.totalChildCount}명</span>
             </div>
           `;
           infoWindowRef.current.close();
@@ -140,11 +160,47 @@ export default function KakaoMap({
     clusterer.addMarkers(newMarkers);
   }, [isLoaded, markers, onMarkerClick]);
 
-  // Highlight selected marker
+  // Highlight selected marker in red
   useEffect(() => {
-    // Visual selection feedback is handled by the list panel
-    // Kakao Maps standard markers don't support easy color changes without custom images
-  }, [selectedMarkerId]);
+    if (!isLoaded) return;
+
+    const kakao = window.kakao;
+
+    const makeImage = (src: string, size: KakaoSize): KakaoMarkerImage => {
+      const s = new kakao.maps.Size(size.width, size.height);
+      return new kakao.maps.MarkerImage(src, s);
+    };
+
+    // Restore previous selected marker
+    const prevId = selectedMarkerIdRef.current;
+    if (prevId) {
+      const prevMarker = markerMapRef.current.get(prevId);
+      const prevData = markerDataRef.current.get(prevId);
+      if (prevMarker && prevData) {
+        if (prevData.markerType === 'childcare') {
+          prevMarker.setImage(makeImage(
+            'https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/markerStar.png',
+            { width: 24, height: 35 },
+          ));
+        } else {
+          prevMarker.setImage(null as unknown as KakaoMarkerImage);
+        }
+      }
+    }
+
+    // Highlight new selected marker in red
+    if (selectedMarkerId) {
+      const marker = markerMapRef.current.get(selectedMarkerId);
+      if (marker) {
+        marker.setImage(makeImage(
+          'https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/marker_red.png',
+          { width: 36, height: 36 },
+        ));
+      }
+    }
+
+    selectedMarkerIdRef.current = selectedMarkerId;
+  }, [isLoaded, selectedMarkerId]);
 
   if (error) {
     return (

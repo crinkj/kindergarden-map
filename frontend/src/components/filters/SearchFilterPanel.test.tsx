@@ -3,6 +3,7 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import SearchFilterPanel from '@/components/search/SearchFilterPanel';
 
 const defaultProps = {
+  facilityMode: 'kindergarten' as const,
   keyword: '',
   onKeywordChange: jest.fn(),
   sidoCode: '',
@@ -13,11 +14,20 @@ const defaultProps = {
   sggList: [{ sidoCode: '11', sggCode: '680', name: '강남구' }],
   establish: '',
   onEstablishChange: jest.fn(),
+  crtype: '',
+  onCrtypeChange: jest.fn(),
+  minChildren: '',
+  maxChildren: '',
+  onMinChildrenChange: jest.fn(),
+  onMaxChildrenChange: jest.fn(),
+  rankingMode: false,
+  onRankingModeChange: jest.fn(),
   hasOpertime: false,
   onHasOpertimeChange: jest.fn(),
   hasHomepage: false,
   onHasHomepageChange: jest.fn(),
   onReset: jest.fn(),
+  onExcelDownload: jest.fn(),
   isLoading: false,
   isError: false,
 };

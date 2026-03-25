@@ -13,14 +13,16 @@ interface RegionStat {
 interface RegionRankingProps {
   sidoCode: string;
   onSelectSgg?: (sggCode: string) => void;
+  mode?: 'kindergarten' | 'childcare';
 }
 
 const MEDAL = ['🥇', '🥈', '🥉'];
 
-export default function RegionRanking({ sidoCode, onSelectSgg }: RegionRankingProps) {
+export default function RegionRanking({ sidoCode, onSelectSgg, mode = 'kindergarten' }: RegionRankingProps) {
+  const typeParam = mode === 'childcare' ? '&type=childcare' : '';
   const url = sidoCode
-    ? `/api/regions/stats?sidoCode=${sidoCode}`
-    : '/api/regions/stats';
+    ? `/api/regions/stats?sidoCode=${sidoCode}${typeParam}`
+    : `/api/regions/stats?${typeParam.slice(1)}`;
 
   const { data, isLoading } = useSWR<{ data: RegionStat[] }>(
     url,
@@ -30,6 +32,7 @@ export default function RegionRanking({ sidoCode, onSelectSgg }: RegionRankingPr
 
   const rows = data?.data ?? [];
   const label = sidoCode ? '시군구별' : '시도별';
+  const facilityLabel = mode === 'childcare' ? '어린이집' : '유치원';
 
   if (isLoading) {
     return (
@@ -44,7 +47,7 @@ export default function RegionRanking({ sidoCode, onSelectSgg }: RegionRankingPr
   return (
     <div className="overflow-y-auto">
       <div className="px-3 py-2 border-b border-gray-200 text-xs font-medium text-gray-500">
-        {label} 유치원 수 순위
+        {label} {facilityLabel} 수 순위
       </div>
       <div className="divide-y divide-gray-100">
         {rows.map((row, idx) => (

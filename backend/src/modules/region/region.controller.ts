@@ -13,8 +13,9 @@ export class RegionController {
   @Get('stats')
   async getStats(
     @Query('sidoCode') sidoCode?: string,
+    @Query('type') type?: string,
   ): Promise<{ data: { code: string; name: string; count: number; totalChildren: number }[] }> {
-    const data = await this.regionService.getStats(sidoCode);
+    const data = await this.regionService.getStats(sidoCode, type);
     return { data };
   }
 

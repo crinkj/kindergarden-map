@@ -2,6 +2,8 @@ import dynamic from 'next/dynamic';
 import LoadingSpinner from '@/components/common/LoadingSpinner';
 import { MapBounds } from '@/lib/types';
 
+export type { MarkerData } from './KakaoMap';
+
 const KakaoMap = dynamic(() => import('./KakaoMap'), {
   ssr: false,
   loading: () => (
@@ -18,6 +20,7 @@ interface MarkerData {
   lngtcdnt: number;
   establish: string;
   totalChildCount: number;
+  markerType?: 'kindergarten' | 'childcare';
 }
 
 interface MapWrapperProps {

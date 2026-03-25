@@ -16,6 +16,7 @@ model Kindergarten {
   establish       String?   @map("establish")
   edate           String?   @map("edate")
   odate           String?   @map("odate")
+  zipcode         String?   @map("zipcode")
   addr            String?   @map("addr")
   telno           String?   @map("telno")
   hpaddr          String?   @map("hpaddr")
@@ -67,6 +68,41 @@ model RegionCode {
   @@unique([sidoCode, sggCode])
   @@index([sidoCode])
   @@map("region_codes")
+}
+
+model Childcare {
+  id              Int       @id @default(autoincrement())
+  stcode          String    @unique @map("stcode")         // 어린이집 코드 (11자리)
+  crname          String    @map("crname")                 // 어린이집명
+  crtypename      String?   @map("crtype_name")            // 유형 (국공립/민간/가정/법인/직장/협동)
+  crstatusname    String?   @map("crstatus_name")          // 상태 (정상/휴지/폐지)
+  sidoname        String?   @map("sido_name")
+  sigunguname     String?   @map("sigungu_name")
+  arcode          String?   @map("arcode")                 // 시군구 코드 (5자리)
+  zipcode         String?   @map("zipcode")
+  craddr          String?   @map("craddr")
+  crtelno         String?   @map("crtelno")
+  crfaxno         String?   @map("crfaxno")
+  crhome          String?   @map("crhome")
+  crcapat         Int       @default(0) @map("crcapat")    // 정원
+  crchcnt         Int       @default(0) @map("crchcnt")    // 현원
+  la              Float?    @map("la")                     // 위도
+  lo              Float?    @map("lo")                     // 경도
+  nrtrroomcnt     Int       @default(0) @map("nrtrroomcnt") // 보육실 수
+  cctvinstlcnt    Int       @default(0) @map("cctvinstlcnt") // CCTV 수
+  chcrtescnt      Int       @default(0) @map("chcrtescnt") // 통학차량 수
+  crspec          String?   @map("crspec")                 // 특징
+  crcnfmdt        String?   @map("crcnfmdt")               // 인가일
+  frstcnfmdt      String?   @map("frstcnfmdt")             // 최초인가일
+
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @updatedAt @map("updated_at")
+
+  @@index([arcode])
+  @@index([crname])
+  @@index([crtypename])
+  @@index([la, lo])
+  @@map("childcares")
 }
 
 model SyncJob {

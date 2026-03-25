@@ -21,7 +21,11 @@ export class RegionService {
     return Object.entries(SIDO_CODES).map(([code, name]) => ({ code, name }));
   }
 
-  async getStats(sidoCode?: string): Promise<{ code: string; name: string; count: number; totalChildren: number }[]> {
+  async getStats(sidoCode?: string, type?: string): Promise<{ code: string; name: string; count: number; totalChildren: number }[]> {
+    if (type === 'childcare') {
+      return this.getChildcareStats(sidoCode);
+    }
+
     if (sidoCode) {
       // 시군구별 통계
       const rows = await this.prisma.kindergarten.groupBy({
@@ -60,6 +64,49 @@ export class RegionService {
         count: r._count.kinderCode,
         totalChildren: r._sum.totalChildCount ?? 0,
       }));
+    }
+  }
+
+  private async getChildcareStats(sidoCode?: string): Promise<{ code: string; name: string; count: number; totalChildren: number }[]> {
+    if (sidoCode) {
+      // 시군구별 어린이집 통계 (arcode 5자리로 그룹핑)
+      const rows = await this.prisma.childcare.groupBy({
+        by: ['arcode', 'sigunguname'],
+        where: { arcode: { startsWith: sidoCode } },
+        _count: { stcode: true },
+        _sum: { crchcnt: true },
+        orderBy: { _count: { stcode: 'desc' } },
+      });
+
+      return rows
+        .filter((r) => r.arcode)
+        .map((r) => ({
+          code: r.arcode ?? '',
+          name: r.sigunguname ?? r.arcode ?? '',
+          count: r._count.stcode,
+          totalChildren: r._sum.crchcnt ?? 0,
+        }));
+    } else {
+      // 시도별 어린이집 통계 (sidoname 기준)
+      const rows = await this.prisma.childcare.groupBy({
+        by: ['sidoname'],
+        _count: { stcode: true },
+        _sum: { crchcnt: true },
+        orderBy: { _count: { stcode: 'desc' } },
+      });
+
+      const nameToCode = Object.fromEntries(
+        Object.entries(SIDO_CODES).map(([code, name]) => [name, code]),
+      );
+
+      return rows
+        .filter((r) => r.sidoname)
+        .map((r) => ({
+          code: nameToCode[r.sidoname ?? ''] ?? '',
+          name: r.sidoname ?? '',
+          count: r._count.stcode,
+          totalChildren: r._sum.crchcnt ?? 0,
+        }));
     }
   }
 

@@ -2,7 +2,7 @@ import { Body, Controller, Get, Post, Query } from '@nestjs/common';
 import { SyncService } from '../sync/sync.service';
 
 interface StartSyncBody {
-  jobType: 'full' | 'sido' | 'sgg';
+  jobType: 'full' | 'sido' | 'sgg' | 'childcare';
   targetCode?: string;
 }
 

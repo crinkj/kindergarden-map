@@ -3,7 +3,21 @@
 import { SidoItem, SggItem } from '@/lib/types';
 import { ESTABLISH_TYPES } from '@/lib/constants';
 
+type FacilityMode = 'kindergarten' | 'childcare';
+
+const CHILDCARE_TYPES = [
+  { value: '', label: '전체 유형' },
+  { value: '국공립', label: '국공립' },
+  { value: '민간', label: '민간' },
+  { value: '가정', label: '가정' },
+  { value: '법인', label: '법인' },
+  { value: '직장', label: '직장' },
+  { value: '협동', label: '협동' },
+];
+
 interface SearchFilterPanelProps {
+  facilityMode: FacilityMode;
+
   keyword: string;
   onKeywordChange: (value: string) => void;
 
@@ -16,6 +30,9 @@ interface SearchFilterPanelProps {
 
   establish: string;
   onEstablishChange: (value: string) => void;
+
+  crtype: string;
+  onCrtypeChange: (value: string) => void;
 
   minChildren: string;
   maxChildren: string;
@@ -37,6 +54,7 @@ interface SearchFilterPanelProps {
 }
 
 export default function SearchFilterPanel({
+  facilityMode,
   keyword,
   onKeywordChange,
   sidoCode,
@@ -47,6 +65,8 @@ export default function SearchFilterPanel({
   sggList,
   establish,
   onEstablishChange,
+  crtype,
+  onCrtypeChange,
   minChildren,
   maxChildren,
   onMinChildrenChange,
@@ -64,6 +84,7 @@ export default function SearchFilterPanel({
 }: SearchFilterPanelProps) {
   const inputClass =
     'w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500';
+  const isKinder = facilityMode === 'kindergarten';
 
   return (
     <div className="flex flex-col gap-4 p-4">
@@ -76,16 +97,16 @@ export default function SearchFilterPanel({
       {/* 검색어 */}
       <div>
         <label htmlFor="keyword-input" className="mb-1 block text-xs font-medium text-gray-700">
-          유치원명 검색
+          {isKinder ? '유치원명 검색' : '어린이집명 검색'}
         </label>
         <input
           id="keyword-input"
           type="text"
           value={keyword}
           onChange={(e) => onKeywordChange(e.target.value)}
-          placeholder="유치원 이름 입력..."
+          placeholder={isKinder ? '유치원 이름 입력...' : '어린이집 이름 입력...'}
           className={inputClass}
-          aria-label="유치원명 검색"
+          aria-label={isKinder ? '유치원명 검색' : '어린이집명 검색'}
           disabled={isLoading}
         />
       </div>
@@ -137,26 +158,51 @@ export default function SearchFilterPanel({
         </select>
       </div>
 
-      {/* 설립유형 */}
-      <div>
-        <label htmlFor="establish-select" className="mb-1 block text-xs font-medium text-gray-700">
-          설립유형
-        </label>
-        <select
-          id="establish-select"
-          value={establish}
-          onChange={(e) => onEstablishChange(e.target.value)}
-          className={inputClass}
-          aria-label="설립유형 선택"
-          disabled={isLoading}
-        >
-          {ESTABLISH_TYPES.map((type) => (
-            <option key={type.value} value={type.value}>
-              {type.label}
-            </option>
-          ))}
-        </select>
-      </div>
+      {/* 설립유형 (유치원만) */}
+      {isKinder && (
+        <div>
+          <label htmlFor="establish-select" className="mb-1 block text-xs font-medium text-gray-700">
+            설립유형
+          </label>
+          <select
+            id="establish-select"
+            value={establish}
+            onChange={(e) => onEstablishChange(e.target.value)}
+            className={inputClass}
+            aria-label="설립유형 선택"
+            disabled={isLoading}
+          >
+            {ESTABLISH_TYPES.map((type) => (
+              <option key={type.value} value={type.value}>
+                {type.label}
+              </option>
+            ))}
+          </select>
+        </div>
+      )}
+
+      {/* 유형 (어린이집만) */}
+      {!isKinder && (
+        <div>
+          <label htmlFor="crtype-select" className="mb-1 block text-xs font-medium text-gray-700">
+            유형
+          </label>
+          <select
+            id="crtype-select"
+            value={crtype}
+            onChange={(e) => onCrtypeChange(e.target.value)}
+            className={inputClass}
+            aria-label="유형 선택"
+            disabled={isLoading}
+          >
+            {CHILDCARE_TYPES.map((type) => (
+              <option key={type.value} value={type.value}>
+                {type.label}
+              </option>
+            ))}
+          </select>
+        </div>
+      )}
 
       {/* 원아 수 범위 */}
       <div>
@@ -184,8 +230,8 @@ export default function SearchFilterPanel({
         </div>
       </div>
 
-      {/* 랭킹 모드 */}
-      {(sidoCode || sggCode) && (
+      {/* 랭킹 모드 (유치원만) */}
+      {isKinder && (sidoCode || sggCode) && (
         <label className="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
           <input
             type="checkbox"
@@ -198,29 +244,31 @@ export default function SearchFilterPanel({
         </label>
       )}
 
-      {/* 부가 필터 */}
-      <div className="flex flex-col gap-2">
-        <label className="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
-          <input
-            type="checkbox"
-            checked={hasOpertime}
-            onChange={(e) => onHasOpertimeChange(e.target.checked)}
-            className="rounded border-gray-300"
-            disabled={isLoading}
-          />
-          운영시간 정보 있음
-        </label>
-        <label className="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
-          <input
-            type="checkbox"
-            checked={hasHomepage}
-            onChange={(e) => onHasHomepageChange(e.target.checked)}
-            className="rounded border-gray-300"
-            disabled={isLoading}
-          />
-          홈페이지 있음
-        </label>
-      </div>
+      {/* 부가 필터 (유치원만) */}
+      {isKinder && (
+        <div className="flex flex-col gap-2">
+          <label className="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={hasOpertime}
+              onChange={(e) => onHasOpertimeChange(e.target.checked)}
+              className="rounded border-gray-300"
+              disabled={isLoading}
+            />
+            운영시간 정보 있음
+          </label>
+          <label className="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={hasHomepage}
+              onChange={(e) => onHasHomepageChange(e.target.checked)}
+              className="rounded border-gray-300"
+              disabled={isLoading}
+            />
+            홈페이지 있음
+          </label>
+        </div>
+      )}
 
       {/* 버튼 */}
       <div className="flex flex-col gap-2">

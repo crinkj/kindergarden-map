@@ -21,9 +21,16 @@ function formatDatetime(iso: string): string {
   });
 }
 
+const JOB_TYPE_LABELS: Record<string, string> = {
+  full: '유치원 전국',
+  sido: '유치원 시도',
+  sgg: '유치원 시군구',
+  childcare: '어린이집 전국',
+};
+
 export default function AdminPage() {
-  const [isStarting, setIsStarting] = useState(false);
-  const [message, setMessage] = useState('');
+  const [startingType, setStartingType] = useState<string | null>(null);
+  const [messages, setMessages] = useState<Record<string, string>>({});
 
   const { data, mutate, isLoading } = useSWR<SyncJobListResponse>(
     '/api/admin/sync/jobs',
@@ -31,17 +38,20 @@ export default function AdminPage() {
     { refreshInterval: 5000 },
   );
 
-  const handleFullSync = async (): Promise<void> => {
-    setIsStarting(true);
-    setMessage('');
+  const handleSync = async (jobType: 'full' | 'childcare'): Promise<void> => {
+    setStartingType(jobType);
+    setMessages((prev) => ({ ...prev, [jobType]: '' }));
     try {
-      const res = await startSync({ jobType: 'full' });
-      setMessage(`작업 #${res.jobId} 시작됨`);
+      const res = await startSync({ jobType });
+      setMessages((prev) => ({ ...prev, [jobType]: `작업 #${res.jobId} 시작됨` }));
       await mutate();
     } catch (err) {
-      setMessage(err instanceof Error ? err.message : '동기화 시작 실패');
+      setMessages((prev) => ({
+        ...prev,
+        [jobType]: err instanceof Error ? err.message : '동기화 시작 실패',
+      }));
     } finally {
-      setIsStarting(false);
+      setStartingType(null);
     }
   };
 
@@ -51,21 +61,39 @@ export default function AdminPage() {
     <div className="max-w-3xl mx-auto p-6">
       <h1 className="text-2xl font-bold text-gray-900 mb-6">관리자 - 데이터 수집</h1>
 
-      {/* Full sync button */}
-      <div className="bg-white rounded shadow p-5 mb-6 flex items-center justify-between gap-4">
+      {/* 유치원 full sync */}
+      <div className="bg-white rounded shadow p-5 mb-4 flex items-center justify-between gap-4">
         <div>
           <h2 className="text-base font-semibold text-gray-900">전국 유치원 데이터 최신화</h2>
           <p className="text-xs text-gray-500 mt-1">
-            전국 모든 시도·시군구의 유치원 정보를 유치원알리미 API에서 새로 수집합니다.
+            전국 모든 시도·시군구의 유치원 정보를 유치원알리미 API에서 새로 수집합니다. (우편번호 포함)
           </p>
-          {message && <p className="text-xs text-blue-600 mt-2">{message}</p>}
+          {messages['full'] && <p className="text-xs text-blue-600 mt-2">{messages['full']}</p>}
         </div>
         <button
-          onClick={handleFullSync}
-          disabled={isStarting}
+          onClick={() => handleSync('full')}
+          disabled={startingType !== null}
           className="flex-shrink-0 rounded bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-50 transition"
         >
-          {isStarting ? '수집 중...' : '전국 최신화 시작'}
+          {startingType === 'full' ? '수집 중...' : '전국 최신화 시작'}
+        </button>
+      </div>
+
+      {/* 어린이집 full sync */}
+      <div className="bg-white rounded shadow p-5 mb-6 flex items-center justify-between gap-4">
+        <div>
+          <h2 className="text-base font-semibold text-gray-900">전국 어린이집 데이터 최신화</h2>
+          <p className="text-xs text-gray-500 mt-1">
+            전국 모든 지역의 어린이집 정보를 보육통합정보시스템 API에서 새로 수집합니다. (우편번호 포함)
+          </p>
+          {messages['childcare'] && <p className="text-xs text-blue-600 mt-2">{messages['childcare']}</p>}
+        </div>
+        <button
+          onClick={() => handleSync('childcare')}
+          disabled={startingType !== null}
+          className="flex-shrink-0 rounded bg-green-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-green-700 disabled:opacity-50 transition"
+        >
+          {startingType === 'childcare' ? '수집 중...' : '전국 최신화 시작'}
         </button>
       </div>
 
@@ -85,6 +113,9 @@ export default function AdminPage() {
                   <div className="flex items-center gap-3 min-w-0">
                     <span className="text-xs text-gray-400 w-5 text-right flex-shrink-0">#{job.id}</span>
                     <span className={`text-sm font-medium ${statusInfo.color}`}>{statusInfo.label}</span>
+                    <span className="text-xs bg-gray-100 text-gray-600 px-1.5 py-0.5 rounded">
+                      {JOB_TYPE_LABELS[job.jobType] ?? job.jobType}
+                    </span>
                     {job.errorCount > 0 && (
                       <span className="text-xs text-red-500">오류 {job.errorCount}건</span>
                     )}

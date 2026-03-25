@@ -12,13 +12,15 @@ declare global {
           options: { center: unknown; level: number },
         ) => KakaoMap;
         LatLng: new (lat: number, lng: number) => KakaoLatLng;
-        Marker: new (options: { position: KakaoLatLng; map?: KakaoMap }) => KakaoMarker;
+        Marker: new (options: { position: KakaoLatLng; map?: KakaoMap; image?: KakaoMarkerImage }) => KakaoMarker;
         MarkerClusterer: new (options: {
           map: KakaoMap;
           averageCenter?: boolean;
           minLevel?: number;
         }) => KakaoMarkerClusterer;
         InfoWindow: new (options: { content: string }) => KakaoInfoWindow;
+        Size: new (width: number, height: number) => KakaoSize;
+        MarkerImage: new (src: string, size: KakaoSize) => KakaoMarkerImage;
         event: {
           addListener: (target: unknown, type: string, handler: () => void) => void;
           removeListener: (target: unknown, type: string, handler: () => void) => void;
@@ -48,6 +50,7 @@ export interface KakaoBounds {
 export interface KakaoMarker {
   setMap: (map: KakaoMap | null) => void;
   getPosition: () => KakaoLatLng;
+  setImage: (image: KakaoMarkerImage | null) => void;
 }
 
 export interface KakaoMarkerClusterer {
@@ -58,6 +61,15 @@ export interface KakaoMarkerClusterer {
 export interface KakaoInfoWindow {
   open: (map: KakaoMap, marker: KakaoMarker) => void;
   close: () => void;
+}
+
+export interface KakaoSize {
+  width: number;
+  height: number;
+}
+
+export interface KakaoMarkerImage {
+  /** opaque handle */ _type: 'MarkerImage';
 }
 
 export function useKakaoMap() {

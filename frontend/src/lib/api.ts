@@ -2,6 +2,8 @@ import {
   KindergartenDetail,
   KindergartenListResponse,
   KindergartenFilters,
+  ChildcareListResponse,
+  ChildcareFilters,
   MapBounds,
   SidoItem,
   SggItem,
@@ -57,8 +59,26 @@ export async function fetchSggList(sidoCode: string): Promise<{ data: SggItem[] 
   return apiFetch<{ data: SggItem[] }>(`/api/regions/sgg?sidoCode=${sidoCode}`);
 }
 
+export async function fetchChildcares(
+  filters: Partial<ChildcareFilters>,
+  bounds?: MapBounds,
+): Promise<ChildcareListResponse> {
+  const params = buildQueryString({
+    ...(bounds ?? {}),
+    keyword: filters.keyword,
+    arcode: filters.arcode,
+    crtype: filters.crtype,
+    minChildren: filters.minChildren,
+    maxChildren: filters.maxChildren,
+    page: filters.page,
+    limit: 100,
+  });
+
+  return apiFetch<ChildcareListResponse>(`/api/childcares?${params}`);
+}
+
 export async function startSync(body: {
-  jobType: 'full' | 'sido' | 'sgg';
+  jobType: 'full' | 'sido' | 'sgg' | 'childcare';
   targetCode?: string;
 }): Promise<{ jobId: number; status: string; message: string }> {
   return apiFetch('/api/admin/sync', {

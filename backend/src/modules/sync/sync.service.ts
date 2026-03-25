@@ -1,10 +1,11 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { KindergartenCollectorService } from './collector/kindergarten-collector.service';
+import { ChildcareCollectorService } from './collector/childcare-collector.service';
 import { SyncJob } from '@prisma/client';
 
 interface StartSyncOptions {
-  jobType: 'full' | 'sido' | 'sgg';
+  jobType: 'full' | 'sido' | 'sgg' | 'childcare';
   targetCode?: string;
 }
 
@@ -26,6 +27,7 @@ export class SyncService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly collector: KindergartenCollectorService,
+    private readonly childcareCollector: ChildcareCollectorService,
   ) {}
 
   async startSync(options: StartSyncOptions): Promise<StartSyncResult> {
@@ -76,7 +78,12 @@ export class SyncService {
       }
       // jobType === 'full': 둘 다 undefined → 전국 순회
 
-      const result = await this.collector.collectAll(filterSidoCode, filterSggCode);
+      let result;
+      if (options.jobType === 'childcare') {
+        result = await this.childcareCollector.collectAll(options.targetCode);
+      } else {
+        result = await this.collector.collectAll(filterSidoCode, filterSggCode);
+      }
 
       await this.prisma.syncJob.update({
         where: { id: jobId },
